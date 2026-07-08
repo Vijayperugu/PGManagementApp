@@ -1,45 +1,25 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect } from 'react'
+import BootSplash from 'react-native-bootsplash'
+import PgProvide from './src/context/PgProvide'
+import RootNavigator from './src/navigation/RootNavigator'
+import { QueryClientProvider } from '@tanstack/react-query'
+import { queryClient } from './src/utils/queryClient'
+import { setRequestInterceptor } from './src/api/requestInterceptor'
 
-import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
-import {
-  SafeAreaProvider,
-  useSafeAreaInsets,
-} from 'react-native-safe-area-context';
-
-function App() {
-  const isDarkMode = useColorScheme() === 'dark';
+const App = () => {
+  useEffect(() => {
+    BootSplash.hide({ fade: true })
+    setRequestInterceptor()
+  }, [])
 
   return (
-    <SafeAreaProvider>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <AppContent />
-    </SafeAreaProvider>
-  );
+    <QueryClientProvider  client={queryClient}>
+      <PgProvide>
+        <RootNavigator />
+      </PgProvide>
+    </QueryClientProvider>
+
+  )
 }
 
-function AppContent() {
-  const safeAreaInsets = useSafeAreaInsets();
-
-  return (
-    <View style={styles.container}>
-      <NewAppScreen
-        templateFileName="App.tsx"
-        safeAreaInsets={safeAreaInsets}
-      />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
-
-export default App;
+export default App

@@ -1,0 +1,31 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: pg-management-backend
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;databaseName=pg_management;encrypt=true;trustServerCertificate=true
+    username: sa
+    password: Welcome@1234
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.SQLServerDialect
+        format_sql: false
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:change-this-secret-to-at-least-64-characters-for-production-use}
+    access-token-expiration-ms: 900000
+    refresh-token-expiration-ms: 604800000
+
+logging:
+  level:
+    com.pgmanagement: INFO
+    org.springframework.security: INFO
