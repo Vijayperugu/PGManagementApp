@@ -20,7 +20,14 @@ const renderProfileIcon = ({ color, size }: { color: string; size: number }) => 
 
 const TabNavigation = () => {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+
+      screenOptions={{
+        tabBarActiveTintColor: '#e38144',   
+        tabBarInactiveTintColor: '#9CA3AF'
+      }}
+
+    >
 
       <Tab.Screen
         name="Home"

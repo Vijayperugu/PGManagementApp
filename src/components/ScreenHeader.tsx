@@ -37,7 +37,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 8,
         paddingBottom: 16,
-        elevation: 8
     },
     containerTitle: {
         fontSize: 24,

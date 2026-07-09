@@ -11,12 +11,11 @@ const HomeStack = () => {
       <Stack.Screen
         name="HomeScreen"
         options={{ headerShown: false }}
+        component={HomeScreen}
       >
-        {() => (
-          <ScreenWrapper>
-            <HomeScreen />
-          </ScreenWrapper>
-        )}
+
+      
+       
       </Stack.Screen>
 
     </Stack.Navigator>

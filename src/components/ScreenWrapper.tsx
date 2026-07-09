@@ -12,7 +12,11 @@ const ScreenWrapper: React.FC<ScreenWrapperProps> = ({
   style,
 }) => {
   return (
-    <SafeAreaView style={[styles.container, style]} edges={['top', 'bottom']}>
+    <SafeAreaView edges={['top']}
+      style={{
+        flex: 1,
+        backgroundColor: '#e38144',
+      }}>
       {children}
     </SafeAreaView>
   );

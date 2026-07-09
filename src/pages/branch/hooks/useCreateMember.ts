@@ -5,7 +5,7 @@ import {
     useQueryClient,
 } from '@tanstack/react-query';
 import { MemberRequest } from '../types/members';
-import { createMember } from '../services/memberService';
+import { createMember, deleteMember } from '../services/memberService';
 
 
 
@@ -22,6 +22,24 @@ export const useCreateMember = (roomId: number,closeModal: () => void) => {
         },
         onError: (error: any) => {
             const message =error?.response?.data?.message ??'Failed to create member';
+            Alert.alert('Error', message);
+        },
+    });
+};
+
+
+export const useDeleteMember =( roomId: number) => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: (memberId: number) => deleteMember(memberId),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ 
+                queryKey: ['members', roomId],
+            });
+            Alert.alert('Success deleted');
+        },
+        onError: (error: any) => {
+            const message =error?.response?.data?.message ??'Failed to delete member';
             Alert.alert('Error', message);
         },
     });

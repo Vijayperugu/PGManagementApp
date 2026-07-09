@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, TextInput, ActivityIndicator } from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, TextInput, ActivityIndicator, Alert } from 'react-native';
 
 import { useRoute } from '@react-navigation/native';
 
-import { Briefcase, CalendarDays, MapPin, Phone, Plus } from 'lucide-react-native';
+import { Briefcase, CalendarDays, MapPin, Phone, Plus, Trash2 } from 'lucide-react-native';
 
 import { brachStyle } from '../../../styles/Branch';
 import ScreenWrapper from '../../../components/ScreenWrapper';
@@ -11,6 +11,7 @@ import AddUserScreen from '../components/AddUserScreen';
 
 import { useMembers } from '../hooks/useMembers';
 import ScreenHeader from '../../../components/ScreenHeader';
+import { useDeleteMember } from '../hooks/useCreateMember';
 
 const UserScreen = () => {
   const route = useRoute<any>();
@@ -19,6 +20,7 @@ const UserScreen = () => {
   const [showUserModal, setShowUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const deleteMemeberMutation = useDeleteMember(roomId);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -55,19 +57,29 @@ const UserScreen = () => {
     });
   }, [members, debouncedSearchQuery]);
 
+
+  const deleleteMember = (memberId: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this member?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteMemeberMutation.mutate(memberId)
+        },
+      ]
+    );
+  };
+
   if (isLoading) {
     return (
-      <ScreenWrapper>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+      <View style={brachStyle.Center}>
+        
           <ActivityIndicator size="large" />
-        </View>
-      </ScreenWrapper>
+       
+      </View>
     );
   }
 
@@ -104,30 +116,28 @@ const UserScreen = () => {
   return (
     <ScreenWrapper>
       <View style={brachStyle.screen}>
+        <View style={brachStyle.headerSection}>
+          <ScreenHeader title="Branches" />
+          <TextInput
+            style={brachStyle.searchInput}
+            placeholder="Search branches"
+            placeholderTextColor="#9CA3AF"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+
+        </View>
         <ScrollView
           style={brachStyle.container}
           contentContainerStyle={
             brachStyle.userListContent
           }
         >
-          <ScreenHeader
-            title="Members"
-          />
 
-          <TextInput
-            style={brachStyle.searchInput}
-            placeholder="Search members"
-            placeholderTextColor="#9CA3AF"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
 
           {filteredMembers.length > 0 ? (
-            filteredMembers.map(member => (
-              <View
-                key={member.id}
-                style={brachStyle.userCard}
-              >
+            filteredMembers.flatMap(member => (
+              <View key={member.id} style={brachStyle.userCard}>
                 <View style={brachStyle.userInfo}>
                   <Text style={brachStyle.userName}>
                     {member.name}
@@ -138,81 +148,39 @@ const UserScreen = () => {
                     {member.gender}
                   </Text>
 
-                  <View
-                    style={
-                      brachStyle.userDetailRow
-                    }
-                  >
-                    <Phone
-                      size={15}
-                      color="#4B5563"
-                    />
-
-                    <Text
-                      style={
-                        brachStyle.userDetailText
-                      }
-                    >
+                  <View style={brachStyle.userDetailRow}>
+                    <Phone size={15} color="#4B5563" />
+                    <Text style={brachStyle.userDetailText}>
                       {member.phone}
                     </Text>
                   </View>
 
-                  <View
-                    style={
-                      brachStyle.userDetailRow
-                    }
-                  >
-                    <Briefcase
-                      size={15}
-                      color="#4B5563"
-                    />
-
-                    <Text
-                      style={
-                        brachStyle.userDetailText
-                      }
-                    >
+                  <View style={brachStyle.userDetailRow}>
+                    <Briefcase size={15} color="#4B5563" />
+                    <Text style={brachStyle.userDetailText}>
                       {member.occupation}
                     </Text>
                   </View>
 
-                  <View
-                    style={
-                      brachStyle.userDetailRow
-                    }
-                  >
-                    <CalendarDays
-                      size={15}
-                      color="#4B5563"
-                    />
-
-                    <Text
-                      style={
-                        brachStyle.userDetailText
-                      }
-                    >
-                      Joined{' '}
-                      {member.joiningDate}
+                  <View style={brachStyle.userDetailRow}>
+                    <CalendarDays size={15} color="#4B5563" />
+                    <Text style={brachStyle.userDetailText}>
+                      Joined{' '}{member.joiningDate}
                     </Text>
                   </View>
 
-                  <View
-                    style={
-                      brachStyle.userDetailRow
-                    }
-                  >
-                    <MapPin
-                      size={15}
-                      color="#4B5563"
-                    />
-
-                    <Text
-                      style={
-                        brachStyle.userDetailText
-                      }
-                    >
+                  <View style={brachStyle.userDetailRow}>
+                    <MapPin size={15} color="#4B5563" />
+                    <Text style={brachStyle.userDetailText}>
                       {member.address}
                     </Text>
+                  </View>
+                  <View style={brachStyle.userDetailRow}>
+                    <TouchableOpacity onPress={() => deleleteMember(member.id)} >
+                      <View style={brachStyle.deleteBoxButton}>
+                        <Trash2 size={20} color="#f50303" />
+                      </View>
+                    </TouchableOpacity>
                   </View>
                 </View>
               </View>

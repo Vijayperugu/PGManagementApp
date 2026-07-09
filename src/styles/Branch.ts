@@ -9,14 +9,20 @@ export const brachStyle = StyleSheet.create({
     flex: 1,
     backgroundColor: '#F5F5F5',
   },
+  headerSection: {
+    backgroundColor: "#e38144",
+    paddingHorizontal: 18,
+    paddingTop: 6,
+    paddingBottom: 18,
+  },
   homeScreen: {
+    padding: 8,
     flex: 1,
     backgroundColor: '#F5F5F5',
-    padding: 16,
   },
-  contianerTwo:{
-    flex:1,
-    padding:10
+  contianerTwo: {
+    flex: 1,
+    padding: 10
   },
   listContent: {
     padding: 16,
@@ -101,11 +107,12 @@ export const brachStyle = StyleSheet.create({
     alignItems: 'center',
     marginRight: 14,
     marginBottom: 4,
+    marginTop: 4
   },
   cardStatText: {
     marginLeft: 5,
     color: '#4B5563',
-    fontSize: 13,
+    fontSize: 16,
   },
   summaryGrid: {
     flexDirection: 'row',
@@ -178,17 +185,17 @@ export const brachStyle = StyleSheet.create({
     fontSize: 13,
   },
   fab: {
-  position: 'absolute',
-  bottom: 25,
-  right: 25,
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-  backgroundColor: '#007AFF',
-  justifyContent: 'center',
-  alignItems: 'center',
-  elevation: 5,
-},
+    position: 'absolute',
+    bottom: 25,
+    right: 25,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#e38144',
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
 
   fabText: {
     color: '#fff',
@@ -219,4 +226,20 @@ export const brachStyle = StyleSheet.create({
     borderTopRightRadius: 18,
     overflow: 'hidden',
   },
+  deleteBoxButton: {
+    flex: 1,
+    width: 48,
+    height: 36,
+    backgroundColor: '#ffdcdc',
+    borderRadius: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+  },
+  Center:{
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+}
 })

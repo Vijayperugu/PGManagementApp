@@ -1,37 +1,46 @@
-import { View, Text } from 'react-native'
+import { View, Text, TextInput } from 'react-native'
 import React, { useContext } from 'react'
 import { Building2, DoorOpen, Users } from 'lucide-react-native'
 import { brachStyle } from '../../../styles/Branch';
 import PgContext from '../../../context/PgContext';
 import ScreenHeader from '../../../components/ScreenHeader';
+import ScreenWrapper from '../../../components/ScreenWrapper';
 
 const HomeScreen = () => {
   const { branches, rooms, members } = useContext(PgContext);
 
   return (
-    <View style={brachStyle.homeScreen}>
-      <ScreenHeader
-        title="Dashboard"
-        canGoBack={false}
-      />
-      <View style={brachStyle.summaryGrid}>
-        <View style={brachStyle.summaryCard}>
-          <Building2 size={24} color="#2563EB" />
-          <Text style={brachStyle.summaryValue}>{branches.length}</Text>
-          <Text style={brachStyle.summaryLabel}>Branches</Text>
-        </View>
-        <View style={brachStyle.summaryCard}>
-          <DoorOpen size={24} color="#059669" />
-          <Text style={brachStyle.summaryValue}>{rooms.length}</Text>
-          <Text style={brachStyle.summaryLabel}>Rooms</Text>
-        </View>
-        <View style={brachStyle.summaryCard}>
-          <Users size={24} color="#DB2777" />
-          <Text style={brachStyle.summaryValue}>{members.length}</Text>
-          <Text style={brachStyle.summaryLabel}>Users</Text>
+    <ScreenWrapper>
+      <View style={brachStyle.headerSection}>
+        <ScreenHeader title="Dashboard"
+          canGoBack={false} />
+        <TextInput
+          style={brachStyle.searchInput}
+          placeholder="Search branches"
+          placeholderTextColor="#9CA3AF"
+        />
+      </View>
+      <View style={brachStyle.homeScreen}>
+        <View style={brachStyle.summaryGrid}>
+          <View style={brachStyle.summaryCard}>
+            <Building2 size={24} color="#2563EB" />
+            <Text style={brachStyle.summaryValue}>{branches.length}</Text>
+            <Text style={brachStyle.summaryLabel}>Branches</Text>
+          </View>
+          <View style={brachStyle.summaryCard}>
+            <DoorOpen size={24} color="#059669" />
+            <Text style={brachStyle.summaryValue}>{rooms.length}</Text>
+            <Text style={brachStyle.summaryLabel}>Rooms</Text>
+          </View>
+          <View style={brachStyle.summaryCard}>
+            <Users size={24} color="#DB2777" />
+            <Text style={brachStyle.summaryValue}>{members.length}</Text>
+            <Text style={brachStyle.summaryLabel}>Users</Text>
+          </View>
         </View>
       </View>
-    </View>
+
+    </ScreenWrapper>
   )
 }
 

@@ -1,16 +1,7 @@
 import React, { useContext, useState, useCallback, useEffect, useMemo } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  Modal,
-  ScrollView,
-  TouchableWithoutFeedback,
-  TextInput,
-  ActivityIndicator,
-} from 'react-native';
+import {View,TouchableOpacity,Text,Modal,ScrollView,TouchableWithoutFeedback,TextInput,ActivityIndicator, Alert} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Building2, DoorOpen, Layers } from 'lucide-react-native';
+import { Building2, DoorOpen, Layers, Trash2 } from 'lucide-react-native';
 
 import PgContext from '../../../context/PgContext';
 import BranchregisterScreen from '../components/BranchregisterScreen';
@@ -18,10 +9,13 @@ import { brachStyle } from '../../../styles/Branch';
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import { usebranch } from '../hooks/usebranche';
 import ScreenHeader from '../../../components/ScreenHeader';
+import { useDeleteBranch } from '../hooks/useCreateBranch';
+import Plus from '../components/Plus';
 
 const Branch = () => {
 
   const navigation = useNavigation<any>();
+  const deleteBranchMutation = useDeleteBranch();
 
   const { data: branches = [], isLoading, isError, refetch } = usebranch();
   const [showBranchModal, setShowBranchModal] = useState(false);
@@ -63,19 +57,26 @@ const Branch = () => {
     setShowBranchModal(false);
   }, []);
 
+ const onDelete = (branchId: number) => {
+     Alert.alert(
+       'Confirm Delete',
+       'Are you sure you want to delete this Brach?',
+       [
+         { text: 'Cancel', style: 'cancel' },
+         {
+           text: 'Delete',
+           style: 'destructive',
+           onPress: () => deleteBranchMutation.mutate(branchId)
+         },
+       ]
+     );
+   }
+
   if (isLoading) {
     return (
-      <ScreenWrapper>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+      <View style={brachStyle.Center}>
           <ActivityIndicator size="large" />
-        </View>
-      </ScreenWrapper>
+      </View>
     );
   }
 
@@ -84,13 +85,8 @@ const Branch = () => {
   return (
     <ScreenWrapper>
       <View style={brachStyle.screen}>
-        <ScrollView
-          style={brachStyle.container}
-          contentContainerStyle={brachStyle.listContent}
-        >
-          <ScreenHeader
-            title="Branches"
-          />
+        <View style={brachStyle.headerSection}>
+          <ScreenHeader title="Branches" />
           <TextInput
             style={brachStyle.searchInput}
             placeholder="Search branches"
@@ -98,6 +94,13 @@ const Branch = () => {
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
+
+        </View>
+        <ScrollView
+          style={brachStyle.container}
+          contentContainerStyle={brachStyle.listContent}
+        >
+
           {filteredBranches && filteredBranches.length > 0 ? (
             filteredBranches.map((branch: any) => (
               <TouchableOpacity
@@ -107,7 +110,7 @@ const Branch = () => {
               >
                 <View style={brachStyle.branchCardContent}>
                   <View style={brachStyle.iconBadge}>
-                    <Building2 size={24} color="#2563EB" />
+                    <Building2 size={24} color="#e38144" />
                   </View>
                   <View style={brachStyle.branchInfo}>
                     <Text style={brachStyle.cardTitle}>{branch.name}</Text>
@@ -122,6 +125,13 @@ const Branch = () => {
                         <Text style={brachStyle.cardStatText}>{branch.totalRooms || 0} rooms</Text>
                       </View>
                     </View>
+                    <View style={brachStyle.userDetailRow}>
+                      <TouchableOpacity onPress={() => onDelete(branch.id)} >
+                        <View style={brachStyle.deleteBoxButton}>
+                          <Trash2 size={20} color="#f50303" />
+                        </View>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               </TouchableOpacity>
@@ -135,13 +145,7 @@ const Branch = () => {
           )}
         </ScrollView>
 
-        <TouchableOpacity
-          style={brachStyle.fab}
-          onPress={handleOpenModal}
-          activeOpacity={0.7}
-        >
-          <Text style={brachStyle.fabText}>+</Text>
-        </TouchableOpacity>
+        <Plus onPress={handleOpenModal} />
 
         {showBranchModal && (
           <Modal

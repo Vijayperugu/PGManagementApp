@@ -8,16 +8,18 @@ import {
   Text,
   TextInput,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { BedDouble, DoorOpen, Layers, Plus, Users } from 'lucide-react-native';
+import { BedDouble, DoorOpen, Layers, Plus, Trash2, Users } from 'lucide-react-native';
 
 import { brachStyle } from '../../../styles/Branch';
 import RoomRegisterScreen from '../components/RoomRegisterScreen';
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import { useRooms } from '../hooks/useRoom';
 import ScreenHeader from '../../../components/ScreenHeader';
+import { useDeleteRoom } from '../hooks/useCreateRoom';
 
 
 const RoomScreen = () => {
@@ -28,6 +30,8 @@ const RoomScreen = () => {
   const [showRoomModal, setShowRoomModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  const deleteRoomMutation = useDeleteRoom(branchId);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -58,25 +62,32 @@ const RoomScreen = () => {
     });
   }, [rooms, debouncedSearchQuery]);
 
+  const onDelete = (roomId: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this member?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteRoomMutation.mutate(roomId)
+        },
+      ]
+    );
+  }
+
   if (isLoading) {
     return (
-      <ScreenWrapper>
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
+      <View style={brachStyle.Center}>
           <ActivityIndicator size="large" />
-        </View>
-      </ScreenWrapper>
+      </View>
     );
   }
 
   if (isError) {
     return (
-      <ScreenWrapper>
+      <View>
         <View
           style={{
             flex: 1,
@@ -95,27 +106,30 @@ const RoomScreen = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </ScreenWrapper>
+      </View>
     );
   }
 
   return (
     <ScreenWrapper>
       <View style={brachStyle.screen}>
-        <ScrollView
-          style={brachStyle.container}
-          contentContainerStyle={brachStyle.listContent}
-        >
-          <ScreenHeader
-            title="Rooms"
-          />
+
+        <View style={brachStyle.headerSection}>
+          <ScreenHeader title="Rooms" />
           <TextInput
             style={brachStyle.searchInput}
-            placeholder="Search rooms"
+            placeholder="Search Rooms"
             placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
+
+        </View>
+        <ScrollView
+          style={brachStyle.container}
+          contentContainerStyle={brachStyle.listContent}
+        >
+
 
           {filteredRooms.length > 0 ? (
             filteredRooms.map((room: any) => (
@@ -130,46 +144,43 @@ const RoomScreen = () => {
               >
                 <View style={brachStyle.branchCardContent}>
                   <View style={brachStyle.iconBadge}>
-                    <BedDouble size={24} color="#2563EB" />
+                    <BedDouble size={24} color="#e38144" />
                   </View>
 
                   <View style={brachStyle.branchInfo}>
                     <Text style={brachStyle.cardTitle}>
                       Room {room.roomNumber}
                     </Text>
-
-                    <Text style={brachStyle.cardSubTitle}>
-                      Floor {room.floor}
-                    </Text>
-
-                    <View style={brachStyle.cardStatsRow}>
-                      <View style={brachStyle.cardStat}>
-                        <Users size={14} color="#6B7280" />
-                        <Text style={brachStyle.cardStatText}>
-                          {room.occupied}/{room.capacity} Occupied
-                        </Text>
-                      </View>
-
-                      <View style={brachStyle.cardStat}>
-                        <DoorOpen size={14} color="#6B7280" />
-                        <Text style={brachStyle.cardStatText}>
-                          {room.availableBeds} Beds Available
-                        </Text>
-                      </View>
+                    <View style={brachStyle.cardStat}>
+                      <Layers size={14} color="#6B7280" />
+                      <Text style={brachStyle.cardStatText}>
+                        floor: {room.floor}
+                      </Text>
                     </View>
-
-                    <View
-                      style={[
-                        brachStyle.cardStatsRow,
-                        { marginTop: 8 },
-                      ]}
-                    >
-                      <View style={brachStyle.cardStat}>
-                        <Layers size={14} color="#6B7280" />
-                        <Text style={brachStyle.cardStatText}>
-                          Capacity: {room.capacity}
-                        </Text>
-                      </View>
+                    <View style={brachStyle.cardStat}>
+                      <Users size={14} color="#6B7280" />
+                      <Text style={brachStyle.cardStatText}>
+                        {room.occupied}/{room.capacity} Occupied
+                      </Text>
+                    </View>
+                    <View style={brachStyle.cardStat}>
+                      <DoorOpen size={14} color="#6B7280" />
+                      <Text style={brachStyle.cardStatText}>
+                        {room.availableBeds} Beds Available
+                      </Text>
+                    </View>
+                    <View style={brachStyle.cardStat}>
+                      <Layers size={14} color="#6B7280" />
+                      <Text style={brachStyle.cardStatText}>
+                        Capacity: {room.capacity}
+                      </Text>
+                    </View>
+                    <View style={brachStyle.userDetailRow}>
+                      <TouchableOpacity onPress={() => onDelete(room.id)} >
+                        <View style={brachStyle.deleteBoxButton}>
+                          <Trash2 size={20} color="#f50303" />
+                        </View>
+                      </TouchableOpacity>
                     </View>
                   </View>
                 </View>
