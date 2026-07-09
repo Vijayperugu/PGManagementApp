@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { BranchRequest } from "../types/branch";
-import { createBranch, deleteBranch } from "../services/branchServices";
+import { createBranch, deleteBranch, updateBranch } from "../services/branchServices";
 import { Alert } from "react-native";
 
 
@@ -11,7 +11,7 @@ export const useCreateBranch = () => {
 
     return useMutation({
         mutationFn: (data: BranchRequest) => createBranch(data),
-        onSuccess: response => {
+        onSuccess: () => {
             queryClient.invalidateQueries({
                 queryKey: ["branch"]
             })
@@ -23,6 +23,22 @@ export const useCreateBranch = () => {
     })
 }
 
+export const useUpdateBranch = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({id,data}:{id:number,data: BranchRequest}) => updateBranch(id,data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({
+                queryKey: ["branch"]
+            })
+        },
+        onError: (error: any) => {
+            const message = error?.response?.data?.message ?? 'Failed to update branch';
+            Alert.alert('Error', message);
+        }
+    })
+}
 
 export const useDeleteBranch =()=>{
     const queryClient = useQueryClient();

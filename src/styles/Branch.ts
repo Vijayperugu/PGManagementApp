@@ -230,12 +230,10 @@ export const brachStyle = StyleSheet.create({
     flex: 1,
     width: 48,
     height: 36,
-    backgroundColor: '#ffdcdc',
     borderRadius: 6,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#FCA5A5',
+    marginLeft:4
   },
   Center:{
   flex: 1,

@@ -1,24 +1,25 @@
-import React, { useContext, useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {View,TouchableOpacity,Text,Modal,ScrollView,TouchableWithoutFeedback,TextInput,ActivityIndicator, Alert} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { Building2, DoorOpen, Layers, Trash2 } from 'lucide-react-native';
+import { Building2, DoorOpen, Layers, PencilLine, Trash2 } from 'lucide-react-native';
 
-import PgContext from '../../../context/PgContext';
 import BranchregisterScreen from '../components/BranchregisterScreen';
 import { brachStyle } from '../../../styles/Branch';
 import ScreenWrapper from '../../../components/ScreenWrapper';
-import { usebranch } from '../hooks/usebranche';
+import { useBranch } from '../hooks/usebranche';
 import ScreenHeader from '../../../components/ScreenHeader';
 import { useDeleteBranch } from '../hooks/useCreateBranch';
 import Plus from '../components/Plus';
+import { BranchType } from '../types/branch';
 
 const Branch = () => {
 
   const navigation = useNavigation<any>();
   const deleteBranchMutation = useDeleteBranch();
 
-  const { data: branches = [], isLoading, isError, refetch } = usebranch();
+  const { data: branches = [], isLoading } = useBranch();
   const [showBranchModal, setShowBranchModal] = useState(false);
+  const [selectedBranch, setSelectedBranch] = useState<BranchType | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -50,12 +51,19 @@ const Branch = () => {
   }, [branches, debouncedSearchQuery]);
 
   const handleOpenModal = useCallback(() => {
+    setSelectedBranch(undefined)
     setShowBranchModal(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
     setShowBranchModal(false);
+    setSelectedBranch(undefined);
   }, []);
+
+  const handleEditBranch = useCallback((branch: BranchType) => {
+    setSelectedBranch(branch);
+    setShowBranchModal(true);
+}, []);
 
  const onDelete = (branchId: number) => {
      Alert.alert(
@@ -126,9 +134,20 @@ const Branch = () => {
                       </View>
                     </View>
                     <View style={brachStyle.userDetailRow}>
-                      <TouchableOpacity onPress={() => onDelete(branch.id)} >
+                      <TouchableOpacity onPress={(event) => {
+                        event.stopPropagation();
+                        onDelete(branch.id);
+                      }} >
                         <View style={brachStyle.deleteBoxButton}>
-                          <Trash2 size={20} color="#f50303" />
+                          <Trash2 size={25} color="#f50303" />
+                        </View>
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={(event) => {
+                        event.stopPropagation();
+                        handleEditBranch(branch);
+                      }} >
+                        <View style={brachStyle.deleteBoxButton}>
+                          <PencilLine  size={25} color="#03f564" />
                         </View>
                       </TouchableOpacity>
                     </View>
@@ -159,7 +178,7 @@ const Branch = () => {
                 <View style={brachStyle.modalDismissArea} />
               </TouchableWithoutFeedback>
               <View style={brachStyle.modalSheet}>
-                <BranchregisterScreen closeModal={handleCloseModal} />
+                <BranchregisterScreen closeModal={handleCloseModal} branch={selectedBranch} />
               </View>
             </View>
           </Modal>

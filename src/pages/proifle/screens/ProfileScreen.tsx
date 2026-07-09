@@ -70,7 +70,6 @@ const ProfileScreen = () => {
         </View>
 
 
-        <Text style={styles.versionText}>Version 1.0.0</Text>
       </ScrollView>
     </SafeAreaView>
   );

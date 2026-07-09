@@ -1,10 +1,11 @@
 import { ApiResponse } from "../../auth/types/auth";
 
 
-export interface Branch {
+export interface BranchType {
   id: number;
   name: string;
   address: string;
+  totalFloors?: number;
   totalRooms: number;
 }
 
@@ -13,5 +14,5 @@ export interface BranchRequest {
   address: string;
 }
 
-export type BranchResponse = ApiResponse<Branch>;
-export type BranchListResponse = ApiResponse<Branch[]>;
+export type BranchResponse = ApiResponse<BranchType>;
+export type BranchListResponse = ApiResponse<BranchType[]>;

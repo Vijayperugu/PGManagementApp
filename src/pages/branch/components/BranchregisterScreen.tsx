@@ -1,4 +1,4 @@
-import React, { useContext } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,17 +16,19 @@ import {
 } from '../schemas/brancSchema';
 
 import { style } from '../../../styles/login';
-import PgContext from '../../../context/PgContext';
-import { useCreateBranch } from '../hooks/useCreateBranch';
-import { BranchRequest } from '../types/branch';
+import { useCreateBranch, useUpdateBranch } from '../hooks/useCreateBranch';
+import { BranchType } from '../types/branch';
+
 
 interface BranchRegisterProps {
   closeModal: () => void;
+  branch?: BranchType
 }
 
-const BranchregisterScreen = ({ closeModal }: BranchRegisterProps) => {
+const BranchregisterScreen = ({ closeModal, branch }: BranchRegisterProps) => {
   const createBranchMutation = useCreateBranch()
-  const { control, handleSubmit, formState: { errors } } = useForm<BranchFormData>({
+  const updateBranchMutation = useUpdateBranch()
+  const { control, handleSubmit, formState: { errors }, reset } = useForm<BranchFormData>({
     resolver: zodResolver(branchSchema),
     defaultValues: {
       branchName: '',
@@ -35,23 +37,55 @@ const BranchregisterScreen = ({ closeModal }: BranchRegisterProps) => {
     mode: 'all',
   });
 
+  useEffect(() => {
+    if (branch) {
+      reset({
+        branchName: branch.name,
+        address: branch.address,
+      });
+    } else {
+      reset({
+        branchName: '',
+        address: ""
+
+      })
+    }
+  }, [branch, reset])
+
   const onSubmit = (data: BranchFormData) => {
 
     const requestData = {
       name: data.branchName,
       address: data.address
     }
-    createBranchMutation.mutate(requestData)
-    closeModal();
-  };
 
+    if (branch) {
+      updateBranchMutation.mutate({
+        id: branch.id,
+        data: requestData
+      },
+        {
+          onSuccess: () => {
+            closeModal()
+          }
+        }
+      );
+      return
+    }
+    createBranchMutation.mutate(requestData, {
+      onSuccess: () => {
+        closeModal();
+      },
+    });
+  };
+  const isLoading = createBranchMutation.isPending || updateBranchMutation.isPending;
   return (
     <View style={style.screen}>
       <ScrollView
         contentContainerStyle={style.branchContainer}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={style.title}>Add New Branch</Text>
+        <Text style={style.title}>{branch ? 'Edit Branch' : 'Add New Branch'}</Text>
 
         <Controller
           control={control}
@@ -101,11 +135,15 @@ const BranchregisterScreen = ({ closeModal }: BranchRegisterProps) => {
             <Button
               onPress={handleSubmit(onSubmit)}
               title={
-                createBranchMutation.isPending
-                  ? "Saving..."
-                  : "Save"
+                isLoading
+                  ? branch
+                    ? 'Updating...'
+                    : 'Saving...'
+                  : branch
+                    ? 'Update Branch'
+                    : 'Save Branch'
               }
-              disabled={createBranchMutation.isPending}
+              disabled={isLoading}
             />
           </View>
 
