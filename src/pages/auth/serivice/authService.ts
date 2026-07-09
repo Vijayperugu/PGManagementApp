@@ -37,6 +37,7 @@ export const refreshToken = async (data: RefreshTokenRequest): Promise<RefreshRe
     '/auth/refresh',
     data,
   );
+  console.log("Refresh token",response.data)
   return response.data;
 };
 

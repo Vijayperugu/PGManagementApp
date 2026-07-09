@@ -3,13 +3,17 @@ import React, { useContext } from 'react'
 import { Building2, DoorOpen, Users } from 'lucide-react-native'
 import { brachStyle } from '../../../styles/Branch';
 import PgContext from '../../../context/PgContext';
+import ScreenHeader from '../../../components/ScreenHeader';
 
 const HomeScreen = () => {
   const { branches, rooms, members } = useContext(PgContext);
 
   return (
     <View style={brachStyle.homeScreen}>
-      <Text style={brachStyle.screenTitle}>PG Dashboard</Text>
+      <ScreenHeader
+        title="Dashboard"
+        canGoBack={false}
+      />
       <View style={brachStyle.summaryGrid}>
         <View style={brachStyle.summaryCard}>
           <Building2 size={24} color="#2563EB" />

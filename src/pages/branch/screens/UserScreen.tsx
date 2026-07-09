@@ -1,23 +1,24 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {View,Text,TouchableOpacity,Modal,TouchableWithoutFeedback,ScrollView,TextInput,ActivityIndicator} from 'react-native';
+import { View, Text, TouchableOpacity, Modal, TouchableWithoutFeedback, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 
 import { useRoute } from '@react-navigation/native';
 
-import {Briefcase,CalendarDays,MapPin,Phone,Plus} from 'lucide-react-native';
+import { Briefcase, CalendarDays, MapPin, Phone, Plus } from 'lucide-react-native';
 
 import { brachStyle } from '../../../styles/Branch';
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import AddUserScreen from '../components/AddUserScreen';
 
 import { useMembers } from '../hooks/useMembers';
+import ScreenHeader from '../../../components/ScreenHeader';
 
 const UserScreen = () => {
   const route = useRoute<any>();
   const { roomId } = route.params;
-  const {data: members = [],isLoading,isError,refetch,} = useMembers(roomId);
+  const { data: members = [], isLoading, isError, refetch, } = useMembers(roomId);
   const [showUserModal, setShowUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] =useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -109,9 +110,9 @@ const UserScreen = () => {
             brachStyle.userListContent
           }
         >
-          <Text style={brachStyle.screenTitle}>
-            Members
-          </Text>
+          <ScreenHeader
+            title="Members"
+          />
 
           <TextInput
             style={brachStyle.searchInput}

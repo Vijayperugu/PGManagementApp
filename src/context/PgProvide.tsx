@@ -16,19 +16,22 @@ const PgProvide = ({ children }: PgProvideProps) => {
   const [rooms, setRooms] = useState(pgData.rooms);
   const [members, setMembers] = useState(pgData.members);
   const [IsLogin ,setIsLogin]= useState(false)
+  const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    const loadAuthState = async () => {
+  const loadAuthState = async () => {
+    try {
       const [accessToken, refreshToken] = await Promise.all([
         authStorage.getAccessToken(),
         authStorage.getRefreshToken(),
       ]);
-
       setIsLogin(!!accessToken && !!refreshToken);
-    };
-
-    loadAuthState();
-  }, []);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+  loadAuthState();
+}, []);
 
   const getNextId = (items: { id: number }[]) => {
     return items.length ? Math.max(...items.map(item => item.id)) + 1 : 1;
@@ -102,7 +105,8 @@ const PgProvide = ({ children }: PgProvideProps) => {
     addRoom,
     addMember,
     IsLogin,
-    setIsLogin
+    setIsLogin,
+    isInitializing
   };
 
   return (

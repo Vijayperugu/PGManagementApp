@@ -17,13 +17,14 @@ import { brachStyle } from '../../../styles/Branch';
 import RoomRegisterScreen from '../components/RoomRegisterScreen';
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import { useRooms } from '../hooks/useRoom';
+import ScreenHeader from '../../../components/ScreenHeader';
 
 
 const RoomScreen = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const { branchId } = route.params;
-  const {data: rooms = [],isLoading,isError,refetch} = useRooms(branchId);
+  const { data: rooms = [], isLoading, isError, refetch } = useRooms(branchId);
   const [showRoomModal, setShowRoomModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
@@ -41,7 +42,7 @@ const RoomScreen = () => {
       return rooms;
     }
 
-    return rooms.filter((room:any) => {
+    return rooms.filter((room: any) => {
       const searchableText = [
         room.roomNumber,
         room.floor,
@@ -105,8 +106,9 @@ const RoomScreen = () => {
           style={brachStyle.container}
           contentContainerStyle={brachStyle.listContent}
         >
-          <Text style={brachStyle.screenTitle}>Rooms</Text>
-
+          <ScreenHeader
+            title="Rooms"
+          />
           <TextInput
             style={brachStyle.searchInput}
             placeholder="Search rooms"
@@ -116,7 +118,7 @@ const RoomScreen = () => {
           />
 
           {filteredRooms.length > 0 ? (
-            filteredRooms.map((room:any) => (
+            filteredRooms.map((room: any) => (
               <TouchableOpacity
                 key={room.id}
                 style={brachStyle.branchCard}

@@ -17,6 +17,7 @@ import BranchregisterScreen from '../components/BranchregisterScreen';
 import { brachStyle } from '../../../styles/Branch';
 import ScreenWrapper from '../../../components/ScreenWrapper';
 import { usebranch } from '../hooks/usebranche';
+import ScreenHeader from '../../../components/ScreenHeader';
 
 const Branch = () => {
 
@@ -87,7 +88,9 @@ const Branch = () => {
           style={brachStyle.container}
           contentContainerStyle={brachStyle.listContent}
         >
-          <Text style={brachStyle.screenTitle}>Branches</Text>
+          <ScreenHeader
+            title="Branches"
+          />
           <TextInput
             style={brachStyle.searchInput}
             placeholder="Search branches"

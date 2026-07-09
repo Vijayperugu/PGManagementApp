@@ -4,9 +4,14 @@ import PgContext from '../context/PgContext';
 
 import AuthNavigator from './AuthNavigator';
 import RootStack from './RootStack';
+import { is } from 'zod/v4/locales';
 
 const RootNavigator = () => {
-  const { IsLogin } = useContext(PgContext);
+  const { IsLogin,isInitializing } = useContext(PgContext);
+
+  if(isInitializing){
+    return null
+  }
 
   return (
     <NavigationContainer>

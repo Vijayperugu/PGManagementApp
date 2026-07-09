@@ -6,6 +6,7 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './src/utils/queryClient'
 import { setupInterceptors } from './src/api/interceptor'
 
+
 const App = () => {
   useEffect(() => {
     BootSplash.hide({ fade: true })
