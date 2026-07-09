@@ -1,181 +1,314 @@
-import { View, Text, ScrollView, Image, TouchableOpacity, Platform } from 'react-native'
-import React, { useContext, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { UserDataForm, UserSchema } from '../schemas/UserSchema'
-import { style } from '../../../styles/login'
-import { TextInput } from 'react-native'
-import { Button } from 'react-native'
-import PgContext from '../../../context/PgContext'
-import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker'
-import { pickPhotoFromLibrary } from '../../../utils/photoPicker'
-
+import React, { useState } from 'react';
+import {View,Text,ScrollView,TouchableOpacity,Platform,TextInput,Button} from 'react-native';
+import { Image } from 'react-native';
+import { Controller, useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { pickPhotoFromLibrary } from '../../../utils/photoPicker';
+import { style } from '../../../styles/login';
+import {UserSchema,UserDataForm} from '../schemas/UserSchema';
+import { useCreateMember } from '../hooks/useCreateMember';
 interface AddUserProps {
     roomId: number;
     closeModal: () => void;
 }
-const AddUserScreen = ({roomId, closeModal }: AddUserProps) => {
-    const { addMember } = useContext(PgContext);
-    const [showDatePicker, setShowDatePicker] = useState(false);
 
-    const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<UserDataForm>({
+const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const createMemberMutation = useCreateMember(
+        roomId,
+        closeModal,
+    );
+    const { control, handleSubmit, formState: { errors }, watch, setValue } = useForm<UserDataForm>({
         resolver: zodResolver(UserSchema),
         defaultValues: {
             name: '',
             age: '',
-            PhoneNumber: '',
-            Address: '',
+            gender: 'MALE',
+            phone: '',
             occupation: '',
+            address: '',
             joiningDate: '',
-            photoUri: '',
+            photoUri: ''
         },
-        mode: 'all'
-    })
+        mode: 'all',
+    });
     const joiningDate = watch('joiningDate');
     const photoUri = watch('photoUri');
-
-    const onSubmit = (data: UserDataForm) => {
-        addMember(roomId, data)
-        closeModal()
-    }
-
-    const handleDateChange = (_event: DateTimePickerEvent, selectedDate?: Date) => {
+    const handleDateChange = (_event: DateTimePickerEvent, selectedDate?: Date,) => {
         if (Platform.OS === 'android') {
             setShowDatePicker(false);
         }
-
         if (selectedDate) {
-            setValue('joiningDate', selectedDate.toISOString().split('T')[0], {
-                shouldDirty: true,
-                shouldValidate: true,
-            });
+            setValue(
+                'joiningDate',
+                selectedDate.toISOString().split('T')[0],
+                {
+                    shouldValidate: true,
+                    shouldDirty: true,
+                },
+            );
         }
     };
 
     const handlePhotoPick = async () => {
-        const selectedPhotoUri = await pickPhotoFromLibrary();
-        if (selectedPhotoUri) {
-            setValue('photoUri', selectedPhotoUri, {
+        const selectedPhoto = await pickPhotoFromLibrary();
+        if (selectedPhoto) {
+            setValue('photoUri', selectedPhoto, {
                 shouldDirty: true,
                 shouldValidate: true,
             });
         }
     };
 
+    const onSubmit = (data: UserDataForm) => {
+        createMemberMutation.mutate({
+            name: data.name,
+            age: Number(data.age),
+            gender: data.gender,
+            phone: data.phone,
+            occupation: data.occupation,
+            address: data.address,
+            joiningDate: data.joiningDate,
+        });
+    };
+
     return (
-        <ScrollView
-            contentContainerStyle={style.branchContainer}
-            keyboardShouldPersistTaps="handled"
-        >
-            <Text style={style.formTitle}>Add User</Text>
+        <ScrollView contentContainerStyle={style.branchContainer} keyboardShouldPersistTaps="handled">
             <TouchableOpacity style={style.photoPicker} onPress={handlePhotoPick}>
                 {photoUri ? (
-                    <Image source={{ uri: photoUri }} style={style.photoPreview} />
+                    <Image
+                        source={{ uri: photoUri }}
+                        style={style.photoPreview}
+                    />
                 ) : (
-                    <Text style={style.photoPickerText}>Upload Photo</Text>
+                    <Text style={style.photoPickerText}>
+                        Upload Photo
+                    </Text>
                 )}
             </TouchableOpacity>
-            {errors.photoUri && <Text style={style.errorText}>{errors.photoUri.message}</Text>}
+            {/* Name */}
 
-            <View>
-                <Controller
-                    control={control}
-                    name='name'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput style={style.input}
-                            placeholder="Enter name"
-                            value={value}
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                        />
-                    )}
-                />
-                {errors.name && <Text style={style.errorText}>{errors.name.message}</Text>}
-            </View>
-            <View>
-                <Controller
-                    control={control}
-                    name='age'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput style={style.input}
-                            placeholder="Enter Age"
-                            value={value}
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                        />
-                    )}
-                />
-                {errors.age && <Text style={style.errorText}>{errors.age.message}</Text>}
-            </View>
-            <View>
-                <Controller
-                    control={control}
-                    name='PhoneNumber'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput style={style.input}
-                            placeholder="Enter Phone Number"
-                            value={value}
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                        />
-                    )}
-                />
-                {errors.PhoneNumber && <Text style={style.errorText}>{errors.PhoneNumber.message}</Text>}
-            </View>
-            <View>
-                <Controller
-                    control={control}
-                    name='occupation'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput style={style.input}
-                            placeholder="Enter Occupation"
-                            value={value}
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                        />
-                    )}
-                />
-                {errors.occupation && <Text style={style.errorText}>{errors.occupation.message}</Text>}
-            </View>
-            <View>
-                <TouchableOpacity style={style.dateInput} onPress={() => setShowDatePicker(true)}>
-                    <Text style={joiningDate ? style.dateText : style.placeholderText}>
-                        {joiningDate || 'Select Joining Date'}
-                    </Text>
-                </TouchableOpacity>
-                {showDatePicker && (
-                    <DateTimePicker
-                        value={joiningDate ? new Date(joiningDate) : new Date()}
-                        mode="date"
-                        display="default"
-                        maximumDate={new Date()}
-                        onChange={handleDateChange}
+            <Controller
+                control={control}
+                name="name"
+                render={({ field }) => (
+                    <TextInput
+                        style={style.input}
+                        placeholder="Enter Name"
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
                     />
                 )}
-                {errors.joiningDate && <Text style={style.errorText}>{errors.joiningDate.message}</Text>}
-            </View>
-            <View>
-                <Controller
-                    control={control}
-                    name='Address'
-                    render={({ field: { onChange, onBlur, value } }) => (
-                        <TextInput style={[style.textArea]}
-                            placeholder="Enter Address"
-                            value={value}
-                            onBlur={onBlur}
-                            onChangeText={onChange}
-                            multiline={true}
-                            numberOfLines={4}
-                            textAlignVertical="top"
-                        />
-                    )}
+            />
+
+            {errors.name && (
+                <Text style={style.errorText}>
+                    {errors.name.message}
+                </Text>
+            )}
+
+            {/* Age */}
+
+            <Controller
+                control={control}
+                name="age"
+                render={({ field }) => (
+                    <TextInput
+                        style={style.input}
+                        placeholder="Enter Age"
+                        keyboardType="numeric"
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                    />
+                )}
+            />
+
+            {errors.age && (
+                <Text style={style.errorText}>
+                    {errors.age.message}
+                </Text>
+            )}
+
+            {/* Phone */}
+
+            <Controller
+                control={control}
+                name="phone"
+                render={({ field }) => (
+                    <TextInput
+                        style={style.input}
+                        placeholder="Phone Number"
+                        keyboardType="phone-pad"
+                        maxLength={10}
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                    />
+                )}
+            />
+
+            {errors.phone && (
+                <Text style={style.errorText}>
+                    {errors.phone.message}
+                </Text>
+            )}
+
+            {/* Occupation */}
+
+            <Controller
+                control={control}
+                name="occupation"
+                render={({ field }) => (
+                    <TextInput
+                        style={style.input}
+                        placeholder="Occupation"
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                    />
+                )}
+            />
+
+            {errors.occupation && (
+                <Text style={style.errorText}>
+                    {errors.occupation.message}
+                </Text>
+            )}
+
+            {/* Gender */}
+
+            <Text style={{ marginBottom: 8 }}>
+                Gender
+            </Text>
+
+            <Controller
+                control={control}
+                name="gender"
+                render={({ field }) => (
+                    <View
+                        style={{
+                            flexDirection: 'row',
+                            justifyContent: 'space-between',
+                            marginBottom: 20,
+                        }}
+                    >
+                        {['MALE', 'FEMALE', 'OTHER'].map(
+                            gender => (
+                                <TouchableOpacity
+                                    key={gender}
+                                    style={{
+                                        padding: 10,
+                                        borderWidth: 1,
+                                        borderRadius: 8,
+                                        backgroundColor:
+                                            field.value === gender
+                                                ? '#2563EB'
+                                                : '#FFFFFF',
+                                    }}
+                                    onPress={() =>
+                                        field.onChange(gender)
+                                    }
+                                >
+                                    <Text
+                                        style={{
+                                            color:
+                                                field.value === gender
+                                                    ? '#FFFFFF'
+                                                    : '#000000',
+                                        }}
+                                    >
+                                        {gender}
+                                    </Text>
+                                </TouchableOpacity>
+                            ),
+                        )}
+                    </View>
+                )}
+            />
+
+            {errors.gender && (
+                <Text style={style.errorText}>
+                    {errors.gender.message}
+                </Text>
+            )}
+
+            {/* Joining Date */}
+
+            <TouchableOpacity
+                style={style.dateInput}
+                onPress={() => setShowDatePicker(true)}
+            >
+                <Text
+                    style={
+                        joiningDate
+                            ? style.dateText
+                            : style.placeholderText
+                    }
+                >
+                    {joiningDate ||
+                        'Select Joining Date'}
+                </Text>
+            </TouchableOpacity>
+
+            {showDatePicker && (
+                <DateTimePicker
+                    value={
+                        joiningDate
+                            ? new Date(joiningDate)
+                            : new Date()
+                    }
+                    mode="date"
+                    display="default"
+                    maximumDate={new Date()}
+                    onChange={handleDateChange}
                 />
-                {errors.Address && <Text style={style.errorText}>{errors.Address.message}</Text>}
-            </View>
+            )}
+
+            {errors.joiningDate && (
+                <Text style={style.errorText}>
+                    {errors.joiningDate.message}
+                </Text>
+            )}
+
+            {/* Address */}
+
+            <Controller
+                control={control}
+                name="address"
+                render={({ field }) => (
+                    <TextInput
+                        style={style.textArea}
+                        placeholder="Address"
+                        multiline
+                        numberOfLines={4}
+                        textAlignVertical="top"
+                        value={field.value}
+                        onBlur={field.onBlur}
+                        onChangeText={field.onChange}
+                    />
+                )}
+            />
+
+            {errors.address && (
+                <Text style={style.errorText}>
+                    {errors.address.message}
+                </Text>
+            )}
+
             <View style={style.buttonContainer}>
                 <View style={style.buttonWrapper}>
                     <Button
-                        title='Register User'
+                        title={
+                            createMemberMutation.isPending
+                                ? 'Saving...'
+                                : 'Register Member'
+                        }
+                        disabled={
+                            createMemberMutation.isPending
+                        }
                         onPress={handleSubmit(onSubmit)}
                     />
                 </View>
@@ -189,7 +322,7 @@ const AddUserScreen = ({roomId, closeModal }: AddUserProps) => {
                 </View>
             </View>
         </ScrollView>
-    )
-}
+    );
+};
 
-export default AddUserScreen
+export default AddUserScreen;

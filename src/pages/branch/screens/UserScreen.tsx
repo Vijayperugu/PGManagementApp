@@ -1,112 +1,216 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  TouchableWithoutFeedback,
-  ScrollView,
-  Image,
-  TextInput,
-} from 'react-native';
-import { useRoute } from '@react-navigation/native';
-import { Briefcase, CalendarDays, MapPin, Phone, Plus } from 'lucide-react-native';
+import React, { useEffect, useMemo, useState } from 'react';
+import {View,Text,TouchableOpacity,Modal,TouchableWithoutFeedback,ScrollView,TextInput,ActivityIndicator} from 'react-native';
 
-import PgContext from '../../../context/PgContext';
+import { useRoute } from '@react-navigation/native';
+
+import {Briefcase,CalendarDays,MapPin,Phone,Plus} from 'lucide-react-native';
+
 import { brachStyle } from '../../../styles/Branch';
-import AddUserScreen from '../components/AddUserScreen';
 import ScreenWrapper from '../../../components/ScreenWrapper';
+import AddUserScreen from '../components/AddUserScreen';
+
+import { useMembers } from '../hooks/useMembers';
 
 const UserScreen = () => {
-  const { members } = useContext(PgContext);
   const route = useRoute<any>();
   const { roomId } = route.params;
+  const {data: members = [],isLoading,isError,refetch,} = useMembers(roomId);
   const [showUserModal, setShowUserModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] =useState('');
 
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      setDebouncedSearchQuery(searchQuery.trim().toLowerCase());
+    const timeout = setTimeout(() => {
+      setDebouncedSearchQuery(
+        searchQuery.trim().toLowerCase(),
+      );
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(timeout);
   }, [searchQuery]);
 
-  const roomMembers = useMemo(() => {
-    const filteredMembers = members.filter(
-      (member: any) => member.roomId === roomId
-    );
-
+  const filteredMembers = useMemo(() => {
     if (!debouncedSearchQuery) {
-      return filteredMembers;
+      return members;
     }
 
-    return filteredMembers.filter((member: any) => {
+    return members.filter(member => {
       const searchableText = [
         member.name,
         member.age,
+        member.gender,
         member.phone,
         member.occupation,
-        member.course,
-        member.joiningDate,
         member.address,
-        member.email,
+        member.joiningDate,
       ]
         .filter(Boolean)
         .join(' ')
         .toLowerCase();
 
-      return searchableText.includes(debouncedSearchQuery);
+      return searchableText.includes(
+        debouncedSearchQuery,
+      );
     });
-  }, [debouncedSearchQuery, members, roomId]);
+  }, [members, debouncedSearchQuery]);
+
+  if (isLoading) {
+    return (
+      <ScreenWrapper>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <ActivityIndicator size="large" />
+        </View>
+      </ScreenWrapper>
+    );
+  }
+
+  if (isError) {
+    return (
+      <ScreenWrapper>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Text>Failed to load members.</Text>
+
+          <TouchableOpacity
+            onPress={() => refetch()}
+            style={{ marginTop: 15 }}
+          >
+            <Text
+              style={{
+                color: '#2563EB',
+                fontWeight: '600',
+              }}
+            >
+              Retry
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScreenWrapper>
+    );
+  }
 
   return (
     <ScreenWrapper>
       <View style={brachStyle.screen}>
         <ScrollView
           style={brachStyle.container}
-          contentContainerStyle={brachStyle.userListContent}
+          contentContainerStyle={
+            brachStyle.userListContent
+          }
         >
-          <Text style={brachStyle.screenTitle}>Users</Text>
+          <Text style={brachStyle.screenTitle}>
+            Members
+          </Text>
+
           <TextInput
             style={brachStyle.searchInput}
-            placeholder="Search users"
+            placeholder="Search members"
             placeholderTextColor="#9CA3AF"
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          {roomMembers.length > 0 ? (
-            roomMembers.map((member: any) => (
-              <View key={member.id} style={brachStyle.userCard}>
-                <Image
-                  source={{ uri: member.photoUri }}
-                  style={brachStyle.userPhoto}
-                />
-                <View style={brachStyle.userInfo}>
-                  <Text style={brachStyle.userName}>{member.name}</Text>
-                  <Text style={brachStyle.userMeta}>Age {member.age}</Text>
 
-                  <View style={brachStyle.userDetailRow}>
-                    <Phone size={15} color="#4B5563" />
-                    <Text style={brachStyle.userDetailText}>{member.phone}</Text>
-                  </View>
-                  <View style={brachStyle.userDetailRow}>
-                    <Briefcase size={15} color="#4B5563" />
-                    <Text style={brachStyle.userDetailText}>
-                      {member.occupation || member.course || 'Occupation not added'}
+          {filteredMembers.length > 0 ? (
+            filteredMembers.map(member => (
+              <View
+                key={member.id}
+                style={brachStyle.userCard}
+              >
+                <View style={brachStyle.userInfo}>
+                  <Text style={brachStyle.userName}>
+                    {member.name}
+                  </Text>
+
+                  <Text style={brachStyle.userMeta}>
+                    Age {member.age} •{' '}
+                    {member.gender}
+                  </Text>
+
+                  <View
+                    style={
+                      brachStyle.userDetailRow
+                    }
+                  >
+                    <Phone
+                      size={15}
+                      color="#4B5563"
+                    />
+
+                    <Text
+                      style={
+                        brachStyle.userDetailText
+                      }
+                    >
+                      {member.phone}
                     </Text>
                   </View>
-                  <View style={brachStyle.userDetailRow}>
-                    <CalendarDays size={15} color="#4B5563" />
-                    <Text style={brachStyle.userDetailText}>
-                      Joined {member.joiningDate || 'Not added'}
+
+                  <View
+                    style={
+                      brachStyle.userDetailRow
+                    }
+                  >
+                    <Briefcase
+                      size={15}
+                      color="#4B5563"
+                    />
+
+                    <Text
+                      style={
+                        brachStyle.userDetailText
+                      }
+                    >
+                      {member.occupation}
                     </Text>
                   </View>
-                  <View style={brachStyle.userDetailRow}>
-                    <MapPin size={15} color="#4B5563" />
-                    <Text style={brachStyle.userDetailText}>
-                      {member.address || 'Address not added'}
+
+                  <View
+                    style={
+                      brachStyle.userDetailRow
+                    }
+                  >
+                    <CalendarDays
+                      size={15}
+                      color="#4B5563"
+                    />
+
+                    <Text
+                      style={
+                        brachStyle.userDetailText
+                      }
+                    >
+                      Joined{' '}
+                      {member.joiningDate}
+                    </Text>
+                  </View>
+
+                  <View
+                    style={
+                      brachStyle.userDetailRow
+                    }
+                  >
+                    <MapPin
+                      size={15}
+                      color="#4B5563"
+                    />
+
+                    <Text
+                      style={
+                        brachStyle.userDetailText
+                      }
+                    >
+                      {member.address}
                     </Text>
                   </View>
                 </View>
@@ -115,31 +219,51 @@ const UserScreen = () => {
           ) : (
             <Text style={brachStyle.emptyText}>
               {debouncedSearchQuery
-                ? 'No users match your search.'
-                : 'No users found. Tap + to add one.'}
+                ? 'No members match your search.'
+                : 'No members found. Tap + to add one.'}
             </Text>
           )}
         </ScrollView>
+
         <TouchableOpacity
           style={brachStyle.fab}
-          onPress={() => setShowUserModal(true)}
+          onPress={() =>
+            setShowUserModal(true)
+          }
         >
-          <Plus color="white" size={28} />
+          <Plus
+            color="white"
+            size={28}
+          />
         </TouchableOpacity>
+
         <Modal
           visible={showUserModal}
           animationType="slide"
           transparent
-          onRequestClose={() => setShowUserModal(false)}
+          onRequestClose={() =>
+            setShowUserModal(false)
+          }
         >
           <View style={brachStyle.modalOverlay}>
-            <TouchableWithoutFeedback onPress={() => setShowUserModal(false)}>
-              <View style={brachStyle.modalDismissArea} />
+            <TouchableWithoutFeedback
+              onPress={() =>
+                setShowUserModal(false)
+              }
+            >
+              <View
+                style={
+                  brachStyle.modalDismissArea
+                }
+              />
             </TouchableWithoutFeedback>
+
             <View style={brachStyle.userSheet}>
               <AddUserScreen
-                closeModal={() => setShowUserModal(false)}
                 roomId={roomId}
+                closeModal={() =>
+                  setShowUserModal(false)
+                }
               />
             </View>
           </View>

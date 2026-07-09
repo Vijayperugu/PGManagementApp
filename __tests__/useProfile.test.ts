@@ -7,6 +7,7 @@ describe('getProfileUserData', () => {
     ).toEqual({
       name: 'Alice',
       email: 'alice@example.com',
+      photoUri: '',
     });
   });
 
@@ -16,6 +17,7 @@ describe('getProfileUserData', () => {
     ).toEqual({
       name: 'Bob',
       email: 'bob@example.com',
+      photoUri: '',
     });
   });
 });

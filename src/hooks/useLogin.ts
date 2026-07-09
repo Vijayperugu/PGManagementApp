@@ -10,7 +10,6 @@ import PgContext from "../context/PgContext"
 
 export const useLogin = () => {
   const { setIsLogin } = useContext(PgContext);
-
   return useMutation({
     mutationFn: (data: LoginRequest) => login(data),
     onSuccess: async (response) => {
@@ -18,6 +17,12 @@ export const useLogin = () => {
       const refreshToken = response?.data?.refreshToken;
       if (accessToken && refreshToken) {
         await authStorage.saveTokens(accessToken, refreshToken);
+        await authStorage.saveUser({
+          id: response?.data?.id,
+          name: response?.data?.name,
+          email: response?.data?.email,
+          role: response?.data?.role,
+        });
         setIsLogin(true);
       } else {
         Alert.alert('Login Failed', 'Login response did not include access tokens.');

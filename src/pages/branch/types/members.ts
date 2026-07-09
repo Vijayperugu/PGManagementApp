@@ -8,11 +8,9 @@ export interface Member {
   age: number;
   gender: Gender;
   phone: string;
-  aadhaarNumber: string;
-  college: string;
-  course: string;
+  occupation: string;
+  address: string;
   joiningDate: string;
-  photoUrl: string | null;
   roomId: number;
 }
 
@@ -21,13 +19,10 @@ export interface MemberRequest {
   age: number;
   gender: Gender;
   phone: string;
-  aadhaarNumber: string;
-  college: string;
-  course: string;
+  occupation: string;
+  address: string;
   joiningDate: string;
-  photoUrl?: string;
 }
 
 export type MemberResponse = ApiResponse<Member>;
-
 export type MemberListResponse = ApiResponse<Member[]>;

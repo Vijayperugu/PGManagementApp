@@ -4,12 +4,12 @@ import PgProvide from './src/context/PgProvide'
 import RootNavigator from './src/navigation/RootNavigator'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './src/utils/queryClient'
-import { setRequestInterceptor } from './src/api/requestInterceptor'
+import { setupInterceptors } from './src/api/interceptor'
 
 const App = () => {
   useEffect(() => {
     BootSplash.hide({ fade: true })
-    setRequestInterceptor()
+    setupInterceptors()
   }, [])
 
   return (

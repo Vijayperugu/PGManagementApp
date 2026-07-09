@@ -1,5 +1,6 @@
 import { api } from "../../../api/axios";
 import { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse } from "../types/auth";
+import { RefreshResponse, RefreshTokenRequest } from "../types/refresh";
 
 
 export const login = async( data :LoginRequest): Promise<LoginResponse> =>{
@@ -20,6 +21,24 @@ export const register = async (data: RegisterRequest): Promise<RegisterResponse>
     return response.data
 
 }
+
+
+export const refresh = async (refreshToken: string): Promise<LoginResponse> => {
+    const response = await api.post<LoginResponse>(
+        "/auth/refresh",
+        { refreshToken }
+    )
+    return response.data
+}
+
+
+export const refreshToken = async (data: RefreshTokenRequest): Promise<RefreshResponse> => {
+  const response = await api.post<RefreshResponse>(
+    '/auth/refresh',
+    data,
+  );
+  return response.data;
+};
 
 
 

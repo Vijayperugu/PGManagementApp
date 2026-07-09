@@ -1,9 +1,10 @@
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import PgContext from './PgContext';
 import pgData from './pgData';
 import { BranchFormData } from '../pages/branch/schemas/brancSchema';
-import { RoomDataFrom } from '../pages/branch/schemas/RoomSchema';
+import { RoomDataForm } from '../pages/branch/schemas/RoomSchema';
 import { UserDataForm } from '../pages/branch/schemas/UserSchema';
+import { authStorage } from '../storage/authStorage';
 
 interface PgProvideProps {
   children: ReactNode;
@@ -15,6 +16,19 @@ const PgProvide = ({ children }: PgProvideProps) => {
   const [rooms, setRooms] = useState(pgData.rooms);
   const [members, setMembers] = useState(pgData.members);
   const [IsLogin ,setIsLogin]= useState(false)
+
+  useEffect(() => {
+    const loadAuthState = async () => {
+      const [accessToken, refreshToken] = await Promise.all([
+        authStorage.getAccessToken(),
+        authStorage.getRefreshToken(),
+      ]);
+
+      setIsLogin(!!accessToken && !!refreshToken);
+    };
+
+    loadAuthState();
+  }, []);
 
   const getNextId = (items: { id: number }[]) => {
     return items.length ? Math.max(...items.map(item => item.id)) + 1 : 1;
@@ -33,19 +47,19 @@ const PgProvide = ({ children }: PgProvideProps) => {
     ]);
   };
 
-  const addRoom = (branchId: number, room: RoomDataFrom) => {
+  const addRoom = (branchId: number, room: RoomDataForm) => {
     setRooms(currentRooms => [
       ...currentRooms,
       {
         id: getNextId(currentRooms),
         branchId,
-        floorId: Number(room.floorNo) || 0,
-        roomNo: room.roomNo,
-        capacity: Number(room.NoOfMembers) || 0,
+        floorId: Number(room.floor) || 0,
+        roomNo: room.roomNumber,
+        capacity: Number(room.capacity) || 0,
         occupied: 0,
-        availableBeds: Number(room.NoOfMembers) || 0,
+        availableBeds: Number(room.capacity) || 0,
         rent: Number(room.rent) || 0,
-        roomInfo: room.roomInfo,
+        roomInfo: '',
         status: 'Available',
       },
     ]);
@@ -63,9 +77,9 @@ const PgProvide = ({ children }: PgProvideProps) => {
       age: Number(member.age) || 0,
       gender: 'Unknown',
       photoUri: member.photoUri || '',
-      phone: member.PhoneNumber,
+      phone: member.phone,
       email: '',
-      address: member.Address,
+      address: member.address,
       college: '',
       course: member.occupation,
       occupation: member.occupation,
