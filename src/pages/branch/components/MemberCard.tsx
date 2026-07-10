@@ -10,8 +10,7 @@ interface Props {
     onDelete: (id: number) => void;
 }
 
-const MemberCard = ({member,onEdit,onDelete,
-}: Props) => {
+const MemberCard = ({member,onEdit,onDelete}: Props) => {
 
     return (
         <View style={brachStyle.userCard}>

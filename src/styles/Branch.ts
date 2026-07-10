@@ -219,7 +219,7 @@ export const brachStyle = StyleSheet.create({
     overflow: 'hidden',
   },
   userSheet: {
-    height: '85%',
+    height: '90%',
     width: '100%',
     backgroundColor: '#FFFFFF',
     borderTopLeftRadius: 18,

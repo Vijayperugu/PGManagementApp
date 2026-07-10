@@ -10,6 +10,7 @@ import { useMembers } from '../hooks/useMembers';
 import { useDeleteMember } from '../hooks/useCreateMember';
 import { Member } from '../types/members';
 import MemberCard from '../components/MemberCard';
+import BottomSheetModal from '../components/BottomSheetModal';
 const UserScreen = () => {
   const route = useRoute<any>();
   const { roomId, branchId, room } = route.params;
@@ -96,7 +97,7 @@ const UserScreen = () => {
   if (isLoading) {
     return (
       <View style={brachStyle.Center}>
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color='#e38144' />
       </View>
     );
   }
@@ -166,31 +167,14 @@ const UserScreen = () => {
           <Plus size={28} color="white" />
         </TouchableOpacity>
 
-        <Modal
-          visible={showUserModal}
-          animationType="slide"
-          transparent
-          onRequestClose={handleCloseModal}
-        >
-          <View style={brachStyle.modalOverlay}>
-            <TouchableWithoutFeedback
-              onPress={handleCloseModal}
-            >
-              <View
-                style={brachStyle.modalDismissArea}
-              />
-            </TouchableWithoutFeedback>
-
-            <View style={brachStyle.userSheet}>
-              <AddUserScreen
+        <BottomSheetModal visible={showUserModal} onClose={handleCloseModal} sheetStyle={brachStyle.userSheet}>
+          <AddUserScreen
                 roomId={roomId}
                 branchId={branchId}
                 closeModal={handleCloseModal}
                 member={selectedMember}
               />
-            </View>
-          </View>
-        </Modal>
+        </BottomSheetModal>
       </View>
 
     </ScreenWrapper>

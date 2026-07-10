@@ -16,7 +16,7 @@ const HomeScreen = () => {
           canGoBack={false} />
         <TextInput
           style={brachStyle.searchInput}
-          placeholder="Search branches"
+          placeholder="Search....."
           placeholderTextColor="#9CA3AF"
         />
       </View>
