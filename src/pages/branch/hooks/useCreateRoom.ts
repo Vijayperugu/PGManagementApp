@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { RoomRequest } from '../types/room';
-import { createRoom, deleteRoom } from '../services/roomServices';
+import { createRoom, deleteRoom, updateRoom } from '../services/roomServices';
 
 export const useCreateRoom = (branchId: number,closeModal: () => void,) => {
   const queryClient = useQueryClient();
@@ -23,6 +23,28 @@ export const useCreateRoom = (branchId: number,closeModal: () => void,) => {
     },
   });
 };
+
+export const useUpdateRoom = (branchId: number, closeModal: () => void) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: RoomRequest }) =>
+      updateRoom(id, data),
+    onSuccess: response => {
+      queryClient.invalidateQueries({
+        queryKey: ['rooms', branchId],
+      });
+      closeModal();
+      Alert.alert('Success', response.message);
+    },
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message ??
+        'Failed to update room';
+      Alert.alert('Error', message);
+    },
+  });
+};
+
 export const useDeleteRoom = (branchId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -31,7 +53,7 @@ export const useDeleteRoom = (branchId: number) => {
       queryClient.invalidateQueries({
         queryKey: ['rooms', branchId],
       });
-      Alert.alert('Success Deleted Room',);
+      Alert.alert('Success', 'Room deleted successfully');
     },
     onError: (error: any) => {
       const message =

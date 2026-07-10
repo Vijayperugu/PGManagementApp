@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {View,Text,ScrollView,TouchableOpacity,Platform,TextInput,Button} from 'react-native';
 import { Image } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
@@ -7,19 +7,24 @@ import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/dat
 import { pickPhotoFromLibrary } from '../../../utils/photoPicker';
 import { style } from '../../../styles/login';
 import {UserSchema,UserDataForm} from '../schemas/UserSchema';
-import { useCreateMember } from '../hooks/useCreateMember';
+import { useCreateMember, useUpdateMember } from '../hooks/useCreateMember';
+import { Member } from '../types/members';
 interface AddUserProps {
     roomId: number;
+    branchId: number;
     closeModal: () => void;
+    member?: Member;
 }
 
-const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
+const AddUserScreen = ({roomId,branchId, closeModal, member}: AddUserProps) => {
     const [showDatePicker, setShowDatePicker] = useState(false);
     const createMemberMutation = useCreateMember(
         roomId,
+        branchId,
         closeModal,
     );
-    const { control, handleSubmit, formState: { errors }, watch, setValue } = useForm<UserDataForm>({
+    const updateMemberMutation = useUpdateMember(roomId, closeModal);
+    const { control, handleSubmit, formState: { errors }, watch, setValue, reset } = useForm<UserDataForm>({
         resolver: zodResolver(UserSchema),
         defaultValues: {
             name: '',
@@ -35,6 +40,32 @@ const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
     });
     const joiningDate = watch('joiningDate');
     const photoUri = watch('photoUri');
+
+    useEffect(() => {
+        if (member) {
+            reset({
+                name: member.name,
+                age: String(member.age ?? ''),
+                gender: member.gender,
+                phone: member.phone,
+                occupation: member.occupation,
+                address: member.address,
+                joiningDate: member.joiningDate,
+                photoUri: '',
+            });
+        } else {
+            reset({
+                name: '',
+                age: '',
+                gender: 'MALE',
+                phone: '',
+                occupation: '',
+                address: '',
+                joiningDate: '',
+                photoUri: '',
+            });
+        }
+    }, [member, reset]);
     const handleDateChange = (_event: DateTimePickerEvent, selectedDate?: Date,) => {
         if (Platform.OS === 'android') {
             setShowDatePicker(false);
@@ -62,7 +93,7 @@ const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
     };
 
     const onSubmit = (data: UserDataForm) => {
-        createMemberMutation.mutate({
+        const requestData = {
             name: data.name,
             age: Number(data.age),
             gender: data.gender,
@@ -70,11 +101,24 @@ const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
             occupation: data.occupation,
             address: data.address,
             joiningDate: data.joiningDate,
-        });
+        };
+
+        if (member) {
+            updateMemberMutation.mutate({
+                id: member.id,
+                data: requestData,
+            });
+            return;
+        }
+
+        createMemberMutation.mutate(requestData);
     };
+
+    const isLoading = createMemberMutation.isPending || updateMemberMutation.isPending;
 
     return (
         <ScrollView contentContainerStyle={style.branchContainer} keyboardShouldPersistTaps="handled">
+            <Text style={style.title}>{member ? 'Edit Member' : 'Add New Member'}</Text>
             <TouchableOpacity style={style.photoPicker} onPress={handlePhotoPick}>
                 {photoUri ? (
                     <Image
@@ -302,13 +346,15 @@ const AddUserScreen = ({roomId,closeModal}: AddUserProps) => {
                 <View style={style.buttonWrapper}>
                     <Button
                         title={
-                            createMemberMutation.isPending
-                                ? 'Saving...'
-                                : 'Register Member'
+                            isLoading
+                                ? member
+                                    ? 'Updating...'
+                                    : 'Saving...'
+                                : member
+                                    ? 'Update Member'
+                                    : 'Register Member'
                         }
-                        disabled={
-                            createMemberMutation.isPending
-                        }
+                        disabled={isLoading}
                         onPress={handleSubmit(onSubmit)}
                     />
                 </View>

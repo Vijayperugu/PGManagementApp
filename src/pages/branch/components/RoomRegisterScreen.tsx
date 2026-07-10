@@ -1,21 +1,23 @@
-import React from 'react';
-import {View,Text,Button,ScrollView,TextInput} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Text, Button, ScrollView, TextInput } from 'react-native';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { style } from '../../../styles/login';
-import {roomSchema,RoomDataForm} from '../schemas/RoomSchema';
-import { useCreateRoom } from '../hooks/useCreateRoom';
+import { roomSchema, RoomDataForm } from '../schemas/RoomSchema';
+import { useCreateRoom, useUpdateRoom } from '../hooks/useCreateRoom';
+import { Room } from '../types/room';
 
 interface RoomRegisterProps {
   branchId: number;
   closeModal: () => void;
+  room?: Room
 }
 
-const RoomRegisterScreen = ({branchId,closeModal}: RoomRegisterProps) => {
-  const createRoomMutation = useCreateRoom(branchId,closeModal,
-  );
+const RoomRegisterScreen = ({ branchId, closeModal, room }: RoomRegisterProps) => {
+  const createRoomMutation = useCreateRoom(branchId, closeModal);
+  const updateRoomMutation = useUpdateRoom(branchId, closeModal);
 
-  const {control,handleSubmit,formState: { errors }} = useForm<RoomDataForm>({
+  const { control, handleSubmit, formState: { errors }, reset } = useForm<RoomDataForm>({
     resolver: zodResolver(roomSchema),
     defaultValues: {
       roomNumber: '',
@@ -26,7 +28,41 @@ const RoomRegisterScreen = ({branchId,closeModal}: RoomRegisterProps) => {
     mode: 'all',
   });
 
+
+  useEffect(() => {
+    if (room) {
+      reset({
+        roomNumber: String(room.roomNumber ?? ''),
+        floor: String(room.floor ?? ''),
+        capacity: String(room.capacity ?? ''),
+        rent: String(room.rent ?? '')
+      })
+    } else {
+      reset({
+        roomNumber: '',
+        floor: '',
+        capacity: '',
+        rent: ''
+      })
+    }
+  }, [room, reset]);
+
   const onSubmit = (data: RoomDataForm) => {
+
+  if(room){
+    updateRoomMutation.mutate({
+      id: room.id,
+      data: {
+        roomNumber: data.roomNumber,
+        floor: Number(data.floor),
+        capacity: Number(data.capacity),
+        rent: Number(data.rent),
+      },
+    });
+    return; 
+  }
+
+
     createRoomMutation.mutate({
       roomNumber: data.roomNumber,
       floor: Number(data.floor),
@@ -35,11 +71,16 @@ const RoomRegisterScreen = ({branchId,closeModal}: RoomRegisterProps) => {
     });
   };
 
+  const isLoading = createRoomMutation.isPending || updateRoomMutation.isPending;
   return (
     <ScrollView
       contentContainerStyle={style.branchContainer}
       keyboardShouldPersistTaps="handled"
+
+
     >
+
+      <Text style={style.title}>{room ? 'Edit Room' : 'Add New Room'}</Text>
       <View>
         <Controller
           control={control}
@@ -131,11 +172,15 @@ const RoomRegisterScreen = ({branchId,closeModal}: RoomRegisterProps) => {
         <View style={style.buttonWrapper}>
           <Button
             title={
-              createRoomMutation.isPending
-                ? 'Saving...'
-                : 'Register Room'
+             isLoading
+                ? room
+                  ? 'Updating...'
+                  : 'Creating...'
+                :room
+                  ? 'Update Room'
+                  : 'Create Room'
             }
-            disabled={createRoomMutation.isPending}
+            disabled={isLoading}
             onPress={handleSubmit(onSubmit)}
           />
         </View>

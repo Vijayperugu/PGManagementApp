@@ -1,18 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  TouchableOpacity,
-  Modal,
-  TouchableWithoutFeedback,
-  ScrollView,
-  Text,
-  TextInput,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {View,TouchableOpacity,Modal,TouchableWithoutFeedback,ScrollView,Text,TextInput,ActivityIndicator,Alert} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { BedDouble, DoorOpen, Layers, Plus, Trash2, Users } from 'lucide-react-native';
+import { BedDouble, DoorOpen, Edit, Layers, Pencil, Plus, Trash2, Users } from 'lucide-react-native';
 
 import { brachStyle } from '../../../styles/Branch';
 import RoomRegisterScreen from '../components/RoomRegisterScreen';
@@ -20,6 +9,7 @@ import ScreenWrapper from '../../../components/ScreenWrapper';
 import { useRooms } from '../hooks/useRoom';
 import ScreenHeader from '../../../components/ScreenHeader';
 import { useDeleteRoom } from '../hooks/useCreateRoom';
+import { Room } from '../types/room';
 
 
 const RoomScreen = () => {
@@ -28,6 +18,7 @@ const RoomScreen = () => {
   const { branchId } = route.params;
   const { data: rooms = [], isLoading, isError, refetch } = useRooms(branchId);
   const [showRoomModal, setShowRoomModal] = useState(false);
+  const [selectedRoom, setSelectedRoom] = useState<Room |undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
 
@@ -61,6 +52,21 @@ const RoomScreen = () => {
       return searchableText.includes(debouncedSearchQuery);
     });
   }, [rooms, debouncedSearchQuery]);
+
+  const handleOpenModal = useCallback(() => {
+    setSelectedRoom(undefined);
+    setShowRoomModal(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setShowRoomModal(false);
+    setSelectedRoom(undefined);
+  }, []);
+
+  const handleEditRoom = (room: Room) => {
+    setSelectedRoom(room);
+    setShowRoomModal(true);
+  };
 
   const onDelete = (roomId: number) => {
     Alert.alert(
@@ -139,6 +145,8 @@ const RoomScreen = () => {
                 onPress={() =>
                   navigation.navigate('UserScreen', {
                     roomId: room.id,
+                    branchId: branchId,
+                    room:room
                   })
                 }
               >
@@ -176,6 +184,11 @@ const RoomScreen = () => {
                       </Text>
                     </View>
                     <View style={brachStyle.userDetailRow}>
+                      <TouchableOpacity onPress={() => handleEditRoom(room)} >
+                        <View style={brachStyle.deleteBoxButton}>
+                          <Pencil size={20} color="#007AFF" />
+                        </View>
+                      </TouchableOpacity>
                       <TouchableOpacity onPress={() => onDelete(room.id)} >
                         <View style={brachStyle.deleteBoxButton}>
                           <Trash2 size={20} color="#f50303" />
@@ -197,7 +210,7 @@ const RoomScreen = () => {
 
         <TouchableOpacity
           style={brachStyle.fab}
-          onPress={() => setShowRoomModal(true)}
+          onPress={handleOpenModal}
         >
           <Plus size={28} color="white" />
         </TouchableOpacity>
@@ -206,11 +219,11 @@ const RoomScreen = () => {
           visible={showRoomModal}
           animationType="slide"
           transparent
-          onRequestClose={() => setShowRoomModal(false)}
+          onRequestClose={handleCloseModal}
         >
           <View style={brachStyle.modalOverlay}>
             <TouchableWithoutFeedback
-              onPress={() => setShowRoomModal(false)}
+              onPress={handleCloseModal}
             >
               <View style={brachStyle.modalDismissArea} />
             </TouchableWithoutFeedback>
@@ -218,7 +231,8 @@ const RoomScreen = () => {
             <View style={brachStyle.modalSheet}>
               <RoomRegisterScreen
                 branchId={branchId}
-                closeModal={() => setShowRoomModal(false)}
+                closeModal={handleCloseModal}
+                room={selectedRoom}
               />
             </View>
           </View>

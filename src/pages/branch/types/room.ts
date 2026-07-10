@@ -4,12 +4,12 @@ import { ApiResponse } from "../../auth/types/auth";
 export interface Room {
   id: number;
   roomNumber: string;
-  floor: number;
-  capacity: number;
-  rent: number;
+  floor: string;
+  capacity: string;
+  rent: string;
   branchId: number;
   occupied: number;
-  availableBeds: number;
+  availableBeds: string;
 }
 
 export interface RoomRequest {
